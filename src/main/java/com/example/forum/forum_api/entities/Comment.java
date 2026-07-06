@@ -2,39 +2,117 @@ package com.example.forum.forum_api.entities;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.example.forum.forum_api.exceptions.DomainException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name="tb_comment")
 public class Comment {
 
-  private static Integer idCount = 1;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-  private Integer id;
+  @Column(nullable = false)
   private String text;
+
+  @ManyToOne
+  @JoinColumn(name = "author_id", nullable = false)
   private User author;
-  private List<Comment> commentNest;
-  private Map<Integer, Boolean> votes;
+
+  @ManyToOne
+  @JoinColumn(name = "parent_comment_id")
+  private Comment parentComment;
+
+  @OneToMany(mappedBy = "parentComment")
+  private List<Comment> nestedComments = new ArrayList<>();
+
+  @JsonIgnore
+  @OneToMany(mappedBy = "comment")
+  private List<Vote> votes = new ArrayList<>();
+
+  @Column(nullable = false)
   private Boolean isDeleted;
 
   public Comment() {
+
   }
 
-  public Comment(User author, String text) throws DomainException {
+  public Comment(User author, String text) {
     this.author = author;
-    if (this.author == null) {
-      throw new DomainException("A comment must have an author!");
-    }
-    id = idCount;
-    idCount++;
     this.text = text;
-    if (this.text == null || this.text.equals("")) {
-      throw new DomainException("Empty comment!");
-    }
-    commentNest = new ArrayList<>();
-    votes = new HashMap<>();
     isDeleted = false;
+  }
+
+
+  public Long getId() {
+    return id;
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public void setText(User user, String text) throws DomainException {
+    if (!user.equals(author)) {
+      throw new DomainException("You aren't allowed to edit this comment!");
+    }
+    if (text == null || text.equals("")) {
+      throw new DomainException("Your comment must have a text!");
+    }
+    this.text = text;
+  }
+
+  public User getAuthor() {
+    return author;
+  }
+
+  public void addNestedComment(Comment nestedComment) {
+    nestedComment.parentComment = this;
+    nestedComments.add(nestedComment);
+  }
+
+  public void removeNestedComment(Comment nestedComment) throws DomainException {
+    nestedComment.setIsDeleted();
+  }
+
+  public List<Comment> getCommentNest() {
+    return Collections.unmodifiableList(nestedComments);
+  }
+
+  public void addVote(User user, Boolean vote, Forum forum) throws DomainException {
+
+    if (vote == null) {
+      throw new DomainException("Vote value cannot be null");
+    }
+    if (user.getIsBanned() || forum.getBannedUsers().contains(user)) {
+      throw new DomainException("Banned users can't vote");
+    }
+    votes.add(new Vote(user, vote, this));
+  }
+
+  public List<Vote> getVotes() {
+    return Collections.unmodifiableList(votes);
+  }
+
+  public Boolean getIsDeleted() {
+    return isDeleted;
+  }
+
+  public void setIsDeleted() throws DomainException {
+    this.setText(author, "Comment was deleted.");
+    this.isDeleted = true;
   }
 
   @Override
@@ -60,79 +138,6 @@ public class Comment {
     } else if (!id.equals(other.id))
       return false;
     return true;
-  }
-
-  public Integer getId() {
-    return id;
-  }
-
-  public String getText() {
-    return text;
-  }
-
-  public void setText(User user, String text) throws DomainException {
-    if (!user.equals(author)) {
-      throw new DomainException("You aren't allowed to edit this comment!");
-    }
-    if (text == null || text.equals("")) {
-      throw new DomainException("Your comment must have a text!");
-    }
-    this.text = text;
-  }
-
-  public User getAuthor() {
-    return author;
-  }
-
-  public void addNestedComment(Comment nestedComment) {
-    commentNest.add(nestedComment);
-  }
-
-  public void removeNestedComment(Comment nestedComment) throws DomainException {
-    nestedComment.setIsDeleted();
-  }
-
-  public List<Comment> getCommentNest() {
-    return Collections.unmodifiableList(commentNest);
-  }
-
-  public void addVote(User user, Boolean vote, Forum forum) throws DomainException {
-    if (vote == null) {
-      throw new DomainException("Vote value cannot be null");
-    }
-    if (user.getIsBanned() || forum.getBannedUsers().contains(user)) {
-      throw new DomainException("Banned users can't vote");
-    }
-    votes.put(user.getId(), vote);
-  }
-
-  public Map<Integer, Boolean> getVotes() {
-    return Collections.unmodifiableMap(votes);
-  }
-
-  public int getTotalVotes() {
-
-    int totalVotes = 0;
-
-    for (Boolean vote : votes.values()) {
-      if (vote) {
-        totalVotes++;
-      } else {
-        totalVotes--;
-      }
-    }
-
-    return totalVotes;
-
-  }
-
-  public Boolean getIsDeleted() {
-    return isDeleted;
-  }
-
-  public void setIsDeleted() throws DomainException {
-    this.setText(author, "Comment was deleted.");
-    this.isDeleted = true;
   }
 
 }
