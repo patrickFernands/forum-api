@@ -31,6 +31,11 @@ public class Comment {
   @JoinColumn(name = "author_id", nullable = false)
   private User author;
 
+
+  @ManyToOne
+  @JoinColumn(name = "post_id", nullable = false)
+  private Post postId;
+
   @ManyToOne
   @JoinColumn(name = "parent_comment_id")
   private Comment parentComment;
@@ -39,7 +44,7 @@ public class Comment {
   private List<Comment> nestedComments = new ArrayList<>();
 
   @JsonIgnore
-  @OneToMany(mappedBy = "comment")
+  @OneToMany(mappedBy = "commentVote")
   private List<Vote> votes = new ArrayList<>();
 
   @Column(nullable = false)
@@ -121,6 +126,22 @@ public class Comment {
     int result = 1;
     result = prime * result + ((id == null) ? 0 : id.hashCode());
     return result;
+  }
+
+  public Comment getParentComment() {
+    return parentComment;
+  }
+
+  public void setParentComment(Comment parentComment) {
+    this.parentComment = parentComment;
+  }
+
+  public Post getPostId() {
+    return postId;
+  }
+
+  public void setPostId(Post postId) {
+    this.postId = postId;
   }
 
   @Override

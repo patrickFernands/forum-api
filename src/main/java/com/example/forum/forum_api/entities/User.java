@@ -46,6 +46,10 @@ public class User {
 	private List<Comment> commentsMade;
 
   @JsonIgnore
+	@OneToMany(mappedBy = "poster")
+	private List<Post> postsMade;
+
+  @JsonIgnore
 	@OneToMany(mappedBy = "voter")
 	private List<Vote> votesMade;
 
