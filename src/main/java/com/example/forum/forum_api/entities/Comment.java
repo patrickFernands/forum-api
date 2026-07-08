@@ -3,7 +3,7 @@ package com.example.forum.forum_api.entities;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.example.forum.forum_api.exceptions.DomainException;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -17,7 +17,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="tb_comment")
+@Table(name = "tb_comment")
 public class Comment {
 
   @Id
@@ -31,10 +31,9 @@ public class Comment {
   @JoinColumn(name = "author_id", nullable = false)
   private User author;
 
-
   @ManyToOne
   @JoinColumn(name = "post_id", nullable = false)
-  private Post postId;
+  private Post post;
 
   @ManyToOne
   @JoinColumn(name = "parent_comment_id")
@@ -60,7 +59,6 @@ public class Comment {
     isDeleted = false;
   }
 
-
   public Long getId() {
     return id;
   }
@@ -69,13 +67,7 @@ public class Comment {
     return text;
   }
 
-  public void setText(User user, String text) throws DomainException {
-    if (!user.equals(author)) {
-      throw new DomainException("You aren't allowed to edit this comment!");
-    }
-    if (text == null || text.equals("")) {
-      throw new DomainException("Your comment must have a text!");
-    }
+  public void setText(String text) {
     this.text = text;
   }
 
@@ -88,7 +80,7 @@ public class Comment {
     nestedComments.add(nestedComment);
   }
 
-  public void removeNestedComment(Comment nestedComment) throws DomainException {
+  public void removeNestedComment(Comment nestedComment) {
     nestedComment.setIsDeleted();
   }
 
@@ -96,15 +88,8 @@ public class Comment {
     return Collections.unmodifiableList(nestedComments);
   }
 
-  public void addVote(User user, Boolean vote, Forum forum) throws DomainException {
-
-    if (vote == null) {
-      throw new DomainException("Vote value cannot be null");
-    }
-    if (user.getIsBanned() || forum.getBannedUsers().contains(user)) {
-      throw new DomainException("Banned users can't vote");
-    }
-    votes.add(new Vote(user, vote, this));
+  public void addVote(Vote vote) {
+    votes.add(vote);
   }
 
   public List<Vote> getVotes() {
@@ -115,8 +100,8 @@ public class Comment {
     return isDeleted;
   }
 
-  public void setIsDeleted() throws DomainException {
-    this.setText(author, "Comment was deleted.");
+  public void setIsDeleted() {
+    this.setText("Comment was deleted.");
     this.isDeleted = true;
   }
 
@@ -136,12 +121,12 @@ public class Comment {
     this.parentComment = parentComment;
   }
 
-  public Post getPostId() {
-    return postId;
+  public Post getPost() {
+    return post;
   }
 
-  public void setPostId(Post postId) {
-    this.postId = postId;
+  public void setPost(Post post) {
+    this.post = post;
   }
 
   @Override

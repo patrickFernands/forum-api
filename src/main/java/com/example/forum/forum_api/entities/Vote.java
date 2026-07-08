@@ -1,7 +1,5 @@
 package com.example.forum.forum_api.entities;
 
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="tb_vote")
+@Table(name = "tb_vote")
 public class Vote {
 
     @ManyToOne()
@@ -34,29 +32,23 @@ public class Vote {
     @JoinColumn(name = "post_id", nullable = true)
     private Post postVote;
 
-    public Vote(){
+    public Vote() {
 
     }
 
-    public Vote(User voter, Boolean isUpvote, Comment commentVote){
-        if(commentVote == null){
-            throw new IllegalArgumentException("Vote must be attributed to a comment");
-        }
+    public Vote(User voter, Boolean isUpvote, Comment commentVote) {
         this.voter = voter;
         this.isUpvote = isUpvote;
         this.commentVote = commentVote;
     }
 
-    public Vote(User voter, Boolean isUpvote, Post postVote){
-        if(postVote == null){
-            throw new IllegalArgumentException("Vote must be attributed to a post");
-        }
+    public Vote(User voter, Boolean isUpvote, Post postVote) {
         this.voter = voter;
         this.isUpvote = isUpvote;
         this.postVote = postVote;
     }
 
-     public User getVoter() {
+    public User getVoter() {
         return voter;
     }
 
@@ -67,6 +59,5 @@ public class Vote {
     public Long getId() {
         return id;
     }
-
 
 }

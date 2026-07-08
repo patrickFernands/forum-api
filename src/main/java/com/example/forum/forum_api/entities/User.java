@@ -1,5 +1,6 @@
 package com.example.forum.forum_api.entities;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -14,11 +15,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="tb_user")
+@Table(name = "tb_user")
 public class User {
 
   @Id
@@ -30,7 +32,7 @@ public class User {
 
   @Column(nullable = false, unique = true)
   private String name;
-  
+
   @Column(nullable = false)
   private String password;
 
@@ -42,16 +44,24 @@ public class User {
   private Boolean isBanned;
 
   @JsonIgnore
-	@OneToMany(mappedBy = "author")
-	private List<Comment> commentsMade;
+  @OneToMany(mappedBy = "creator")
+  private List<Forum> forumsMade;
 
   @JsonIgnore
-	@OneToMany(mappedBy = "poster")
-	private List<Post> postsMade;
+  @OneToMany(mappedBy = "author")
+  private List<Comment> commentsMade;
 
   @JsonIgnore
-	@OneToMany(mappedBy = "voter")
-	private List<Vote> votesMade;
+  @OneToMany(mappedBy = "poster")
+  private List<Post> postsMade;
+
+  @JsonIgnore
+  @OneToMany(mappedBy = "voter")
+  private List<Vote> votesMade;
+
+  @JsonIgnore
+  @ManyToMany(mappedBy = "forumAdmins")
+  private List<Forum> adminForums = new ArrayList<>();
 
   public User() {
   }
