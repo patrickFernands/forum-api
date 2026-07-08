@@ -2,12 +2,9 @@ package com.example.forum.forum_api.entities;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.example.forum.forum_api.enums.PostStatus;
-import com.example.forum.forum_api.exceptions.DomainException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
