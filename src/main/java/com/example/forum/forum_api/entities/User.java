@@ -57,7 +57,11 @@ public class User {
 
   @JsonIgnore
   @OneToMany(mappedBy = "voter")
-  private List<Vote> votesMade;
+  private List<PostVote> postVotesMade = new ArrayList<>();
+
+  @JsonIgnore
+  @OneToMany(mappedBy = "voter")
+  private List<CommentVote> commentVotesMade = new ArrayList<>();
 
   @JsonIgnore
   @ManyToMany(mappedBy = "forumAdmins")
@@ -118,8 +122,12 @@ public class User {
     return Collections.unmodifiableList(commentsMade);
   }
 
-  public List<Vote> getVotesMade() {
-    return Collections.unmodifiableList(votesMade);
+  public List<PostVote> getPostVotesMade() {
+    return Collections.unmodifiableList(postVotesMade);
+  }
+
+  public List<CommentVote> getCommentVotesMade() {
+    return Collections.unmodifiableList(commentVotesMade);
   }
 
   @Override
