@@ -1,17 +1,15 @@
 package com.example.forum.forum_api.entities;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.MappedSuperclass;
 
-@Entity
-@Table(name = "tb_vote")
-public class Vote {
+@MappedSuperclass
+public abstract class Vote {
 
     @ManyToOne()
     @JoinColumn(name = "user_id", nullable = false)
@@ -24,28 +22,9 @@ public class Vote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "comment_id", nullable = true)
-    private Comment commentVote;
-
-    @ManyToOne
-    @JoinColumn(name = "post_id", nullable = true)
-    private Post postVote;
-
-    public Vote() {
-
-    }
-
-    public Vote(User voter, Boolean isUpvote, Comment commentVote) {
+    public Vote(User voter, Boolean isUpvote) {
         this.voter = voter;
         this.isUpvote = isUpvote;
-        this.commentVote = commentVote;
-    }
-
-    public Vote(User voter, Boolean isUpvote, Post postVote) {
-        this.voter = voter;
-        this.isUpvote = isUpvote;
-        this.postVote = postVote;
     }
 
     public User getVoter() {

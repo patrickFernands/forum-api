@@ -38,15 +38,15 @@ public class Post {
   private String content;
 
   @JsonIgnore
-  @OneToMany(mappedBy = "postVote")
-  private List<Vote> votes = new ArrayList<>();
+  @OneToMany(mappedBy = "post")
+  private List<PostVote> votes = new ArrayList<>();
 
   @JsonIgnore
-  @OneToMany(mappedBy = "postId")
+  @OneToMany(mappedBy = "post")
   private List<Comment> comments = new ArrayList<>();
 
   @ManyToOne
-  @JoinColumn(name = "forum_id")
+  @JoinColumn(name = "forum_id", nullable = false)
   private Forum forum;
 
   @Enumerated(EnumType.STRING)
@@ -56,11 +56,11 @@ public class Post {
   private Boolean isDeleted;
 
   public Post() {
-
   }
 
-  public Post(User poster, String title, String content) {
+  public Post(User poster, Forum forum, String title, String content) {
     this.poster = poster;
+    this.forum = forum;
     this.title = title;
     this.content = content;
     isDeleted = false;
@@ -107,7 +107,7 @@ public class Post {
     comment.setIsDeleted();
   }
 
-  public void voteInComment(Comment comment, Vote vote) {
+  public void voteInComment(Comment comment, CommentVote vote) {
     comment.addVote(vote);
   }
 
@@ -120,11 +120,11 @@ public class Post {
     return Collections.unmodifiableList(comments);
   }
 
-  public void addVote(Vote vote) {
+  public void addVote(PostVote vote) {
     votes.add(vote);
   }
 
-  public List<Vote> getVotes() {
+  public List<PostVote> getVotes() {
     return Collections.unmodifiableList(votes);
   }
 

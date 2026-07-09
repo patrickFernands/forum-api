@@ -43,8 +43,8 @@ public class Comment {
   private List<Comment> nestedComments = new ArrayList<>();
 
   @JsonIgnore
-  @OneToMany(mappedBy = "commentVote")
-  private List<Vote> votes = new ArrayList<>();
+  @OneToMany(mappedBy = "comment")
+  private List<CommentVote> votes = new ArrayList<>();
 
   @Column(nullable = false)
   private Boolean isDeleted;
@@ -53,9 +53,10 @@ public class Comment {
 
   }
 
-  public Comment(User author, String text) {
+  public Comment(User author, String text, Post post) {
     this.author = author;
     this.text = text;
+    this.post = post;
     isDeleted = false;
   }
 
@@ -88,11 +89,11 @@ public class Comment {
     return Collections.unmodifiableList(nestedComments);
   }
 
-  public void addVote(Vote vote) {
+  public void addVote(CommentVote vote) {
     votes.add(vote);
   }
 
-  public List<Vote> getVotes() {
+  public List<CommentVote> getVotes() {
     return Collections.unmodifiableList(votes);
   }
 

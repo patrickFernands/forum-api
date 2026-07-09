@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.example.forum.forum_api.enums.PostStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
