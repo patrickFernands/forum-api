@@ -22,6 +22,9 @@ public abstract class Vote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public Vote() {
+    }
+
     public Vote(User voter, Boolean isUpvote) {
         this.voter = voter;
         this.isUpvote = isUpvote;
@@ -33,6 +36,14 @@ public abstract class Vote {
 
     public Boolean getIsUpvote() {
         return isUpvote;
+    }
+
+    public void upvote() {
+        isUpvote = true;
+    }
+
+    public void downvote() {
+        isUpvote = false;
     }
 
     public Long getId() {

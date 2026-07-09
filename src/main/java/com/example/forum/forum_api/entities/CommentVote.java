@@ -13,6 +13,9 @@ public class CommentVote extends Vote {
 	@JoinColumn(name = "comment_id", nullable = false)
 	private Comment comment;
 
+	public CommentVote() {
+	}
+
 	public CommentVote(User voter, Boolean isUpvote, Comment comment) {
 		super(voter, isUpvote);
 		this.comment = comment;

@@ -13,6 +13,9 @@ public class PostVote extends Vote {
 	@JoinColumn(name = "post_id", nullable = false)
 	private Post post;
 
+	public PostVote() {
+	}
+
 	public PostVote(User voter, Boolean isUpvote, Post post) {
 		super(voter, isUpvote);
 		this.post = post;
