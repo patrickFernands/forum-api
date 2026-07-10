@@ -56,9 +56,9 @@ public class TestConfig implements CommandLineRunner {
 		userRepository.saveAll(Arrays.asList(user1, user2, admin, troll));
 
 		// 2. CRIANDO FÓRUNS
-		Forum forum1 = new Forum("cars", user1);
-		Forum forum2 = new Forum("trucks", user1);
-		Forum techForum = new Forum("programming", admin);
+		Forum forum1 = new Forum("cars", user1, "cccc");
+		Forum forum2 = new Forum("trucks", user1, "bababa");
+		Forum techForum = new Forum("programming", admin, "lala");
 
 		forumRepository.saveAll(Arrays.asList(forum1, forum2, techForum));
 

@@ -48,13 +48,17 @@ public class Forum {
   @Column(nullable = false)
   private Boolean isDeleted;
 
+  @Column(nullable = false)
+  private String description;
+
   public Forum() {
 
   }
 
-  public Forum(String name, User creator) {
+  public Forum(String name, User creator, String description) {
     this.name = name;
     this.creator = creator;
+    this.description = description;
     forumAdmins.add(creator);
     isDeleted = false;
   }
@@ -101,6 +105,14 @@ public class Forum {
 
   public String getName() {
     return name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   public List<User> getForumAdmins() {

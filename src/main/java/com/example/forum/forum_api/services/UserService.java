@@ -37,9 +37,17 @@ public class UserService {
 	}
 
 	@Transactional
-	public void changeName(Long id, String name) {
+	public void changeName(User loggedUser, Long id, String name) {
+
+		if (name == null || name.isBlank()) {
+			throw new DomainException("Title can't be empty");
+		}
 
 		User user = repository.findById(id).orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!loggedUser.getId().equals(id)) {
+			throw new DomainException("You can only change your name");
+		}
 
 		if (repository.findByName(name).isPresent()) {
 			throw new DomainException("This name is already in use");
@@ -51,9 +59,13 @@ public class UserService {
 	}
 
 	@Transactional
-	public void changeEmail(Long id, String email) {
+	public void changeEmail(User loggedUser, Long id, String email) {
 
 		User user = repository.findById(id).orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!loggedUser.getId().equals(id)) {
+			throw new DomainException("You can only change your email");
+		}
 
 		if (repository.findByEmail(email).isPresent()) {
 			throw new DomainException("This email is already in use");
@@ -64,10 +76,27 @@ public class UserService {
 	}
 
 	@Transactional
-	public void deleteAccount(Long userId) {
+	public void changePassword(User loggedUser, Long id, String password) {
 
-		User user = repository.findById(userId)
+		User user = repository.findById(id).orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!loggedUser.getId().equals(id)) {
+			throw new DomainException("You can only change your password");
+		}
+
+		user.setPassword(password);
+		repository.save(user);
+	}
+
+	@Transactional
+	public void deleteAccount(User loggedUser, Long id) {
+
+		User user = repository.findById(id)
 				.orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!loggedUser.getId().equals(id)) {
+			throw new DomainException("You can't delete someone else account");
+		}
 
 		user.setName("[deleted_" + user.getId() + "]");
 		user.setEmail("deleted_" + user.getId() + "@deleted.com");

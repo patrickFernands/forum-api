@@ -30,7 +30,7 @@ public class CommentService {
 			throw new DomainException("Locked posts can't receive comments");
 		}
 
-		if (forum.getBannedUsers().contains(author)) {
+		if (forum.getBannedUsers().contains(author) || author.getIsBanned()) {
 			throw new DomainException("Banned users can't comment");
 		}
 
@@ -52,7 +52,7 @@ public class CommentService {
 			throw new DomainException("Locked posts can't receive comments");
 		}
 
-		if (forum.getBannedUsers().contains(author)) {
+		if (forum.getBannedUsers().contains(author) || author.getIsBanned()) {
 			throw new DomainException("Banned users can't comment");
 		}
 

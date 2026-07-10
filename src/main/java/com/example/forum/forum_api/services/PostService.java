@@ -20,10 +20,18 @@ public class PostService {
 	@Transactional
 	public Post addPost(Post post) {
 
+		if (post.getTitle() == null || post.getTitle().isBlank()) {
+			throw new DomainException("Title can't be empty");
+		}
+
+		if (post.getContent() == null || post.getContent().isBlank()) {
+			throw new DomainException("Content can't be empty");
+		}
+
 		User poster = post.getPoster();
 		Forum forum = post.getForum();
 
-		if (forum.getBannedUsers().contains(poster)) {
+		if (forum.getBannedUsers().contains(poster) || poster.getIsBanned()) {
 			throw new DomainException("Banned users can't post");
 		}
 
