@@ -35,6 +35,7 @@ public class PostVoteService {
 		if (currentVote && wantsUpvote || !currentVote && !wantsUpvote) {
 
 			repository.delete(vote);
+			return null;
 
 		}
 

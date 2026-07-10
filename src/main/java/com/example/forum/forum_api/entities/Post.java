@@ -37,6 +37,9 @@ public class Post {
   @Column(nullable = false)
   private String content;
 
+  @Column(nullable = false)
+  private Boolean isLocked;
+
   @JsonIgnore
   @OneToMany(mappedBy = "post")
   private List<PostVote> votes = new ArrayList<>();
@@ -64,6 +67,7 @@ public class Post {
     this.title = title;
     this.content = content;
     isDeleted = false;
+    isLocked = false;
   }
 
   public Long getId() {
@@ -124,6 +128,10 @@ public class Post {
     votes.add(vote);
   }
 
+  public Forum getForum() {
+    return forum;
+  }
+
   public List<PostVote> getVotes() {
     return Collections.unmodifiableList(votes);
   }
@@ -136,6 +144,18 @@ public class Post {
     isDeleted = true;
     setTitle("Deleted");
     setContent("This post was deleted!");
+  }
+
+  public void lock() {
+    isLocked = true;
+  }
+
+  public void unlock() {
+    isLocked = false;
+  }
+
+  public Boolean getIsLocked() {
+    return isLocked;
   }
 
 }

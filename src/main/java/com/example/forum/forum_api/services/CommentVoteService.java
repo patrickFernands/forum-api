@@ -35,6 +35,7 @@ public class CommentVoteService {
 		if (currentVote && wantsUpvote || !currentVote && !wantsUpvote) {
 
 			repository.delete(vote);
+			return null;
 
 		}
 

@@ -9,7 +9,7 @@ import com.example.forum.forum_api.entities.User;
 import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.repositories.UserRepository;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -24,11 +24,11 @@ public class UserService {
 	@Transactional
 	public User register(User user) {
 
-		if (!repository.findByEmail(user.getEmail()).isPresent()) {
+		if (repository.findByEmail(user.getEmail()).isPresent()) {
 			throw new DomainException("This email is already in use");
 		}
 
-		if (!repository.findByName(user.getName()).isPresent()) {
+		if (repository.findByName(user.getName()).isPresent()) {
 			throw new DomainException("This name is already in use");
 		}
 
