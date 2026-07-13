@@ -1,5 +1,7 @@
 package com.example.forum.forum_api.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +30,7 @@ public class ForumService {
 			throw new DomainException("Your forum must have a name");
 		}
 
-		if (forum.getDescription() == null || forum.getName().isBlank()) {
+		if (forum.getDescription() == null || forum.getDescription().isBlank()) {
 			throw new DomainException("Your forum must have a description");
 		}
 
@@ -40,6 +42,48 @@ public class ForumService {
 		return savedForum;
 	}
 
-	// editar nome, descricao, remover/adicionar admins, excluir forum.
+
+	@Transactional
+	public void editName(User user, Long id, String name){
+
+		Forum forum = repository.findById(id).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		if(!forum.getCreator().equals(user)){
+			throw new DomainException("You aren't allowed to edit the name.");
+		}
+
+		if (name == null || name.isBlank()) {
+			throw new DomainException("Your forum must have a name");
+		}
+
+		if (repository.findByName(name).isPresent()) {
+			throw new DomainException("This name is already in use");
+		}
+
+		forum.setName(name);
+		repository.save(forum);
+	}
+
+
+	@Transactional
+	public void editDescription(User user, Long id, String content){
+
+		Forum forum = repository.findById(id).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		if(!forum.getCreator().equals(user)){
+			throw new DomainException("You aren't allowed to edit the description.");
+		}
+
+		if (content == null || content.isBlank()) {
+			throw new DomainException("Your forum must have a description");
+		}
+
+		forum.setDescription(content);
+		repository.save(forum);
+	}
+
+
+
+	//remover/adicionar admins, excluir forum.
 
 }
