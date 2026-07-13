@@ -1,21 +1,24 @@
 package com.example.forum.forum_api.services;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.forum.forum_api.entities.Forum;
 import com.example.forum.forum_api.entities.User;
+import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.repositories.ForumRepository;
+import com.example.forum.forum_api.repositories.UserRepository;
 
 @Service
 public class ForumService {
 
 	@Autowired
 	private ForumRepository repository;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Transactional
 	public Forum createForum(Forum forum) {
@@ -42,13 +45,12 @@ public class ForumService {
 		return savedForum;
 	}
 
-
 	@Transactional
-	public void editName(User user, Long id, String name){
+	public void editName(User user, Long forumId, String name) {
 
-		Forum forum = repository.findById(id).orElseThrow(() -> new DomainException("Forum not found!"));
+		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
 
-		if(!forum.getCreator().equals(user)){
+		if (!forum.getCreator().equals(user)) {
 			throw new DomainException("You aren't allowed to edit the name.");
 		}
 
@@ -64,13 +66,12 @@ public class ForumService {
 		repository.save(forum);
 	}
 
-
 	@Transactional
-	public void editDescription(User user, Long id, String content){
+	public void editDescription(User user, Long forumId, String content) {
 
-		Forum forum = repository.findById(id).orElseThrow(() -> new DomainException("Forum not found!"));
+		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
 
-		if(!forum.getCreator().equals(user)){
+		if (!forum.getCreator().equals(user)) {
 			throw new DomainException("You aren't allowed to edit the description.");
 		}
 
@@ -82,8 +83,59 @@ public class ForumService {
 		repository.save(forum);
 	}
 
+	@Transactional
+	public void removeAdmin(User user, Long adminId, Long forumId) {
 
+		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
 
-	//remover/adicionar admins, excluir forum.
+		User admin = userRepository.findById(adminId).orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!user.equals(forum.getCreator())) {
+			throw new DomainException("You aren't allowed to removed admins");
+		}
+
+		if (!forum.getForumAdmins().contains(admin)) {
+			throw new DomainException("Admin not found!");
+		}
+
+		forum.removeAdmin(admin);
+		repository.save(forum);
+	}
+
+	@Transactional
+	public void addAdmin(User user, Long adminId, Long forumId) {
+
+		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		User admin = userRepository.findById(adminId).orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!user.equals(forum.getCreator())) {
+			throw new DomainException("You aren't allowed to add admins");
+		}
+
+		if (forum.getForumAdmins().contains(admin)) {
+			throw new DomainException("User is already an admin!");
+		}
+
+		if (forum.getBannedUsers().contains(admin) || admin.getIsBanned()) {
+			throw new DomainException("Banned users can't become admins");
+		}
+
+		forum.addAdmin(admin);
+		repository.save(forum);
+	}
+
+	@Transactional
+	public void deleteForum(User user, Long forumId) {
+
+		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		if (!user.equals(forum.getCreator()) && !user.getRole().equals(Roles.ADMIN)) {
+			throw new DomainException("You aren't allowed to delete forums!");
+		}
+
+		forum.setIsDeleted();
+		repository.save(forum);
+	}
 
 }

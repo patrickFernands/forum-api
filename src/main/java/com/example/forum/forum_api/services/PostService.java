@@ -31,6 +31,10 @@ public class PostService {
 		User poster = post.getPoster();
 		Forum forum = post.getForum();
 
+		if (forum.getIsDeleted()) {
+			throw new DomainException("Deleted forums can't receive new posts");
+		}
+
 		if (forum.getBannedUsers().contains(poster) || poster.getIsBanned()) {
 			throw new DomainException("Banned users can't post");
 		}
