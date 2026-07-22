@@ -46,9 +46,11 @@ public class ForumService {
 	}
 
 	@Transactional
-	public void editName(User user, Long forumId, String name) {
+	public void editName(Long userId, Long forumId, String name) {
 
 		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (!forum.getCreator().equals(user)) {
 			throw new DomainException("You aren't allowed to edit the name.");
@@ -67,9 +69,11 @@ public class ForumService {
 	}
 
 	@Transactional
-	public void editDescription(User user, Long forumId, String content) {
+	public void editDescription(Long userId, Long forumId, String content) {
 
 		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (!forum.getCreator().equals(user)) {
 			throw new DomainException("You aren't allowed to edit the description.");
@@ -84,9 +88,11 @@ public class ForumService {
 	}
 
 	@Transactional
-	public void removeAdmin(User user, Long adminId, Long forumId) {
+	public void removeAdmin(Long userId, Long adminId, Long forumId) {
 
 		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		User admin = userRepository.findById(adminId).orElseThrow(() -> new DomainException("User not found!"));
 
@@ -103,9 +109,11 @@ public class ForumService {
 	}
 
 	@Transactional
-	public void addAdmin(User user, Long adminId, Long forumId) {
+	public void addAdmin(Long userId, Long adminId, Long forumId) {
 
 		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		User admin = userRepository.findById(adminId).orElseThrow(() -> new DomainException("User not found!"));
 
@@ -126,9 +134,11 @@ public class ForumService {
 	}
 
 	@Transactional
-	public void deleteForum(User user, Long forumId) {
+	public void deleteForum(Long userId, Long forumId) {
 
 		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (!user.equals(forum.getCreator()) && !user.getRole().equals(Roles.ADMIN)) {
 			throw new DomainException("You aren't allowed to delete forums!");
@@ -139,14 +149,15 @@ public class ForumService {
 	}
 
 	@Transactional
-	public void banUser(User user, Long userId, Long forumId) {
+	public void banUser(Long adminId, Long userId, Long forumId) {
 
 		User userToBan = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
+		User admin = userRepository.findById(adminId).orElseThrow(() -> new DomainException("User not found!"));
+
 		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
 
-		if (!forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)
-				&& !forum.getCreator().equals(user)) {
+		if (!forum.getForumAdmins().contains(admin) && !admin.getRole().equals(Roles.ADMIN)) {
 			throw new DomainException("You aren't allowed to ban users!");
 		}
 
@@ -155,21 +166,20 @@ public class ForumService {
 	}
 
 	@Transactional
-	public void unbanUser(User user, Long userId, Long forumId) {
+	public void unbanUser(Long adminId, Long userId, Long forumId) {
 
 		User userToBan = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
+		User admin = userRepository.findById(adminId).orElseThrow(() -> new DomainException("User not found!"));
+
 		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
 
-		if (!forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)
-				&& !forum.getCreator().equals(user)) {
+		if (!forum.getForumAdmins().contains(admin) && !admin.getRole().equals(Roles.ADMIN)) {
 			throw new DomainException("You aren't allowed to unban users!");
 		}
 
 		forum.unbanUser(userToBan);
 		repository.save(forum);
 	}
-
-	// fazer os resources hj e depois jwt com security?
 
 }

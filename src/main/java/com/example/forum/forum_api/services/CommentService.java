@@ -8,8 +8,10 @@ import com.example.forum.forum_api.entities.Forum;
 import com.example.forum.forum_api.entities.Post;
 import com.example.forum.forum_api.entities.User;
 import com.example.forum.forum_api.enums.Roles;
+import com.example.forum.forum_api.enums.PostStatus;
 import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.repositories.CommentRepository;
+import com.example.forum.forum_api.repositories.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,9 @@ public class CommentService {
 	@Autowired
 	private CommentRepository repository;
 
+	@Autowired
+	private UserRepository userRepository;
+
 	@Transactional
 	public Comment addComment(Comment comment) {
 
@@ -26,8 +31,12 @@ public class CommentService {
 		Post post = comment.getPost();
 		Forum forum = post.getForum();
 
-		if (post.getIsLocked()) {
-			throw new DomainException("Locked posts can't receive comments");
+		if (post.getIsLocked() || post.getIsDeleted()) {
+			throw new DomainException("This post can't receive new comments");
+		}
+
+		if (post.getStatus().equals(PostStatus.PENDING)) {
+			throw new DomainException("Peding posts can't receive comments");
 		}
 
 		if (forum.getBannedUsers().contains(author) || author.getIsBanned()) {
@@ -39,17 +48,21 @@ public class CommentService {
 	}
 
 	@Transactional
-	public Comment addReply(Long id, Comment comment) {
+	public Comment addReply(Long originalCommentId, Comment comment) {
 
-		Comment originalComment = repository.findById(id)
+		Comment originalComment = repository.findById(originalCommentId)
 				.orElseThrow(() -> new DomainException("Comment not found!"));
 
 		User author = comment.getAuthor();
 		Post post = originalComment.getPost();
 		Forum forum = post.getForum();
 
-		if (post.getIsLocked()) {
-			throw new DomainException("Locked posts can't receive comments");
+		if (post.getIsLocked() || post.getIsDeleted()) {
+			throw new DomainException("This post can't receive new comments");
+		}
+
+		if (originalComment.getIsDeleted()) {
+			throw new DomainException("Deleted comments can't receive replies");
 		}
 
 		if (forum.getBannedUsers().contains(author) || author.getIsBanned()) {
@@ -57,19 +70,21 @@ public class CommentService {
 		}
 
 		originalComment.addNestedComment(comment);
-		repository.save(originalComment);
+		comment.setPost(post);
 		Comment savedComment = repository.save(comment);
 		return savedComment;
 	}
 
 	@Transactional
-	public void editComment(User user, Long id, String content) {
+	public void editComment(Long userId, Long commentId, String content) {
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (content == null || content.isBlank()) {
 			throw new DomainException("Content can't be empty");
 		}
 
-		Comment comment = repository.findById(id)
+		Comment comment = repository.findById(commentId)
 				.orElseThrow(() -> new DomainException("Comment not found!"));
 
 		User author = comment.getAuthor();
@@ -83,9 +98,11 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void deleteComment(User user, Long id) {
+	public void deleteComment(Long userId, Long commentId) {
 
-		Comment comment = repository.findById(id)
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
+
+		Comment comment = repository.findById(commentId)
 				.orElseThrow(() -> new DomainException("Comment not found!"));
 
 		User author = comment.getAuthor();

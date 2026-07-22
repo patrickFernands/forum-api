@@ -41,19 +41,19 @@ public class User {
   private Roles role;
 
   @Column(nullable = false)
-  private Boolean isBanned;
+  private Boolean isBanned = false;
 
   @JsonIgnore
   @OneToMany(mappedBy = "creator")
-  private List<Forum> forumsMade;
+  private List<Forum> forumsMade = new ArrayList<>();
 
   @JsonIgnore
   @OneToMany(mappedBy = "author")
-  private List<Comment> commentsMade;
+  private List<Comment> commentsMade = new ArrayList<>();
 
   @JsonIgnore
   @OneToMany(mappedBy = "poster")
-  private List<Post> postsMade;
+  private List<Post> postsMade = new ArrayList<>();
 
   @JsonIgnore
   @OneToMany(mappedBy = "voter")
@@ -75,7 +75,6 @@ public class User {
     this.name = name;
     this.password = password;
     this.role = role;
-    isBanned = false;
   }
 
   public Long getId() {
@@ -143,17 +142,24 @@ public class User {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
+    if (this == obj)
       return true;
-    }
-    if (obj == null) {
+    if (obj == null || !(obj instanceof User))
       return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    final User other = (User) obj;
-    return Objects.equals(this.id, other.id);
+    User other = (User) obj;
+    return id != null && id.equals(other.getId());
+  }
+
+  public List<Forum> getForumsMade() {
+    return Collections.unmodifiableList(forumsMade);
+  }
+
+  public List<Post> getPostsMade() {
+    return Collections.unmodifiableList(postsMade);
+  }
+
+  public List<Forum> getAdminForums() {
+    return Collections.unmodifiableList(adminForums);
   }
 
 }

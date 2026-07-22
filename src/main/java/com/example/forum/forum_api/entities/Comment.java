@@ -31,10 +31,12 @@ public class Comment {
   @JoinColumn(name = "author_id", nullable = false)
   private User author;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "post_id", nullable = false)
   private Post post;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "parent_comment_id")
   private Comment parentComment;
@@ -47,7 +49,7 @@ public class Comment {
   private List<CommentVote> votes = new ArrayList<>();
 
   @Column(nullable = false)
-  private Boolean isDeleted;
+  private Boolean isDeleted = false;
 
   public Comment() {
 
@@ -85,7 +87,7 @@ public class Comment {
     nestedComment.setIsDeleted();
   }
 
-  public List<Comment> getCommentNest() {
+  public List<Comment> getNestedComments() {
     return Collections.unmodifiableList(nestedComments);
   }
 
@@ -134,17 +136,10 @@ public class Comment {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
+    if (obj == null || !(obj instanceof Comment))
       return false;
     Comment other = (Comment) obj;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
-    return true;
+    return id != null && id.equals(other.getId());
   }
 
 }

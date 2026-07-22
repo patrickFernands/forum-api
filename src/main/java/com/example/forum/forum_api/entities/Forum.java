@@ -42,11 +42,12 @@ public class Forum {
   @JoinTable(name = "banned_users", joinColumns = @JoinColumn(name = "forum_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
   private List<User> bannedUsers = new ArrayList<>();
 
+  @JsonIgnore
   @OneToMany(mappedBy = "forum")
   private List<Post> posts = new ArrayList<>();
 
   @Column(nullable = false)
-  private Boolean isDeleted;
+  private Boolean isDeleted = false;
 
   @Column(nullable = false)
   private String description;
@@ -130,6 +131,28 @@ public class Forum {
   public void setIsDeleted() {
     name = "Deleted Forum";
     isDeleted = true;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null || getClass() != obj.getClass())
+      return false;
+    Forum other = (Forum) obj;
+    return id != null && id.equals(other.getId());
   }
 
 }

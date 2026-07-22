@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.forum.forum_api.entities.User;
+import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.repositories.UserRepository;
 
@@ -37,16 +38,16 @@ public class UserService {
 	}
 
 	@Transactional
-	public void changeName(User loggedUser, Long id, String name) {
+	public void changeName(Long id, String name) {
 
 		if (name == null || name.isBlank()) {
-			throw new DomainException("Title can't be empty");
+			throw new DomainException("Name can't be empty");
 		}
 
 		User user = repository.findById(id).orElseThrow(() -> new DomainException("User not found!"));
 
-		if (!loggedUser.getId().equals(id)) {
-			throw new DomainException("You can only change your name");
+		if (name.equals(user.getName())) {
+			throw new DomainException("Enter a different name!");
 		}
 
 		if (repository.findByName(name).isPresent()) {
@@ -54,17 +55,20 @@ public class UserService {
 		}
 
 		user.setName(name);
-
 		repository.save(user);
 	}
 
 	@Transactional
-	public void changeEmail(User loggedUser, Long id, String email) {
+	public void changeEmail(Long id, String email) {
 
 		User user = repository.findById(id).orElseThrow(() -> new DomainException("User not found!"));
 
-		if (!loggedUser.getId().equals(id)) {
-			throw new DomainException("You can only change your email");
+		if (email == null || email.isBlank()) {
+			throw new DomainException("Email can't be empty");
+		}
+
+		if (email.equals(user.getEmail())) {
+			throw new DomainException("Enter a different email!");
 		}
 
 		if (repository.findByEmail(email).isPresent()) {
@@ -76,27 +80,19 @@ public class UserService {
 	}
 
 	@Transactional
-	public void changePassword(User loggedUser, Long id, String password) {
+	public void changePassword(Long id, String password) {
 
 		User user = repository.findById(id).orElseThrow(() -> new DomainException("User not found!"));
-
-		if (!loggedUser.getId().equals(id)) {
-			throw new DomainException("You can only change your password");
-		}
 
 		user.setPassword(password);
 		repository.save(user);
 	}
 
 	@Transactional
-	public void deleteAccount(User loggedUser, Long id) {
+	public void deleteAccount(Long id) {
 
 		User user = repository.findById(id)
 				.orElseThrow(() -> new DomainException("User not found!"));
-
-		if (!loggedUser.getId().equals(id)) {
-			throw new DomainException("You can't delete someone else account");
-		}
 
 		user.setName("[deleted_" + user.getId() + "]");
 		user.setEmail("deleted_" + user.getId() + "@deleted.com");
@@ -108,7 +104,14 @@ public class UserService {
 	}
 
 	@Transactional
-	public void banAccount(Long userId) {
+	public void banAccount(Long id, Long userId) {
+
+		User admin = repository.findById(id)
+				.orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!admin.getRole().equals(Roles.ADMIN)) {
+			throw new DomainException("You aren't allowed to ban users");
+		}
 
 		User user = repository.findById(userId)
 				.orElseThrow(() -> new DomainException("User not found!"));
@@ -118,7 +121,14 @@ public class UserService {
 	}
 
 	@Transactional
-	public void unbanAccount(Long userId) {
+	public void unbanAccount(Long id, Long userId) {
+
+		User admin = repository.findById(id)
+				.orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!admin.getRole().equals(Roles.ADMIN)) {
+			throw new DomainException("You aren't allowed to unban users");
+		}
 
 		User user = repository.findById(userId)
 				.orElseThrow(() -> new DomainException("User not found!"));

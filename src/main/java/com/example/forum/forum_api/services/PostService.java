@@ -10,12 +10,17 @@ import com.example.forum.forum_api.entities.User;
 import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.repositories.PostRepository;
+import com.example.forum.forum_api.repositories.UserRepository;
+import com.example.forum.forum_api.enums.PostStatus;
 
 @Service
 public class PostService {
 
 	@Autowired
 	private PostRepository repository;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Transactional
 	public Post addPost(Post post) {
@@ -44,13 +49,15 @@ public class PostService {
 	}
 
 	@Transactional
-	public void editTitle(User user, Long id, String title) {
+	public void editTitle(Long userId, Long postId, String title) {
 
 		if (title == null || title.isBlank()) {
 			throw new DomainException("Title can't be empty");
 		}
 
-		Post post = repository.findById(id)
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
+
+		Post post = repository.findById(postId)
 				.orElseThrow(() -> new DomainException("Post not found!"));
 
 		User poster = post.getPoster();
@@ -64,13 +71,15 @@ public class PostService {
 	}
 
 	@Transactional
-	public void editContent(User user, Long id, String content) {
+	public void editContent(Long userId, Long postId, String content) {
 
 		if (content == null || content.isBlank()) {
 			throw new DomainException("Content can't be empty");
 		}
 
-		Post post = repository.findById(id)
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
+
+		Post post = repository.findById(postId)
 				.orElseThrow(() -> new DomainException("Post not found!"));
 
 		User poster = post.getPoster();
@@ -84,13 +93,15 @@ public class PostService {
 	}
 
 	@Transactional
-	public void lockPost(User user, Long id) {
+	public void lockPost(Long userId, Long postId) {
 
-		Post post = repository.findById(id)
+		Post post = repository.findById(postId)
 				.orElseThrow(() -> new DomainException("Post not found!"));
 
 		User poster = post.getPoster();
 		Forum forum = post.getForum();
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (!user.equals(poster) && !forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)) {
 			throw new DomainException("You aren't allowed to lock this post!");
@@ -101,13 +112,15 @@ public class PostService {
 	}
 
 	@Transactional
-	public void unlockPost(User user, Long id) {
+	public void unlockPost(Long userId, Long postId) {
 
-		Post post = repository.findById(id)
+		Post post = repository.findById(postId)
 				.orElseThrow(() -> new DomainException("Post not found!"));
 
 		User poster = post.getPoster();
 		Forum forum = post.getForum();
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (!user.equals(poster) && !forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)) {
 			throw new DomainException("You aren't allowed to unlock this post!");
@@ -118,19 +131,39 @@ public class PostService {
 	}
 
 	@Transactional
-	public void deletePost(User user, Long id) {
+	public void deletePost(Long userId, Long postId) {
 
-		Post post = repository.findById(id)
+		Post post = repository.findById(postId)
 				.orElseThrow(() -> new DomainException("Post not found!"));
 
 		User poster = post.getPoster();
 		Forum forum = post.getForum();
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (!user.equals(poster) && !forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)) {
 			throw new DomainException("You aren't allowed to delete this post!");
 		}
 
 		post.setIsDeleted();
+		repository.save(post);
+	}
+
+	@Transactional
+	public void approvePost(Long userId, Long postId) {
+
+		Post post = repository.findById(postId)
+				.orElseThrow(() -> new DomainException("Post not found!"));
+
+		Forum forum = post.getForum();
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
+
+		if (!forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)) {
+			throw new DomainException("You aren't allowed to approve this post!");
+		}
+
+		post.setStatus(PostStatus.APPROVED);
 		repository.save(post);
 	}
 
