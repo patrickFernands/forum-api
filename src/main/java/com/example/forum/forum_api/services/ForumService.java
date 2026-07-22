@@ -138,4 +138,38 @@ public class ForumService {
 		repository.save(forum);
 	}
 
+	@Transactional
+	public void banUser(User user, Long userId, Long forumId) {
+
+		User userToBan = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
+
+		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		if (!forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)
+				&& !forum.getCreator().equals(user)) {
+			throw new DomainException("You aren't allowed to ban users!");
+		}
+
+		forum.banUser(userToBan);
+		repository.save(forum);
+	}
+
+	@Transactional
+	public void unbanUser(User user, Long userId, Long forumId) {
+
+		User userToBan = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
+
+		Forum forum = repository.findById(forumId).orElseThrow(() -> new DomainException("Forum not found!"));
+
+		if (!forum.getForumAdmins().contains(user) && !user.getRole().equals(Roles.ADMIN)
+				&& !forum.getCreator().equals(user)) {
+			throw new DomainException("You aren't allowed to unban users!");
+		}
+
+		forum.unbanUser(userToBan);
+		repository.save(forum);
+	}
+
+	// fazer os resources hj e depois jwt com security?
+
 }
