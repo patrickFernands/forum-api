@@ -75,14 +75,14 @@ public class UserResource {
 	@PutMapping("/{id}/ban")
 	public ResponseEntity<Void> ban(@PathVariable Long id, @RequestHeader("User-Id") Long userId) {
 
-		userService.banAccount(id, userId);
+		userService.banAccount(userId, id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping("/{id}/unban")
 	public ResponseEntity<Void> unban(@PathVariable Long id, @RequestHeader("User-Id") Long userId) {
 
-		userService.unbanAccount(id, userId);
+		userService.unbanAccount(userId, id);
 		return ResponseEntity.noContent().build();
 	}
 
