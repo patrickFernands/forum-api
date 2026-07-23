@@ -13,11 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.forum.forum_api.dtos.EditCommentDTO;
+import com.example.forum.forum_api.dtos.IdResponseDTO;
 import com.example.forum.forum_api.dtos.NewCommentDTO;
-import com.example.forum.forum_api.dtos.NewCommentResponseDTO;
-import com.example.forum.forum_api.dtos.UserIdDTO;
 import com.example.forum.forum_api.dtos.VoteDTO;
-import com.example.forum.forum_api.dtos.VoteResponseDTO;
 import com.example.forum.forum_api.entities.Comment;
 import com.example.forum.forum_api.entities.Vote;
 import com.example.forum.forum_api.services.CommentService;
@@ -34,29 +32,32 @@ public class CommentResource {
 	private CommentVoteService commentVoteService;
 
 	@PostMapping()
-	public ResponseEntity<NewCommentResponseDTO> addComment(@RequestBody NewCommentDTO entity) {
+	public ResponseEntity<IdResponseDTO> addComment(@RequestBody NewCommentDTO entity,
+			@RequestHeader("User-Id") Long userId) {
 
-		Comment comment = commentService.addComment(entity.authorId(), entity.text(), entity.postId());
+		Comment comment = commentService.addComment(userId, entity.text(), entity.postId());
 
-		NewCommentResponseDTO savedComment = new NewCommentResponseDTO(comment.getId());
+		IdResponseDTO savedComment = new IdResponseDTO(comment.getId());
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
 	}
 
 	@PostMapping("/{id}/replies")
-	public ResponseEntity<NewCommentResponseDTO> addReply(@PathVariable Long id, @RequestBody NewCommentDTO entity) {
+	public ResponseEntity<IdResponseDTO> addReply(@PathVariable Long id, @RequestBody NewCommentDTO entity,
+			@RequestHeader("User-Id") Long userId) {
 
-		Comment comment = commentService.addReply(id, entity.authorId(), entity.text(), entity.postId());
+		Comment comment = commentService.addReply(id, userId, entity.text(), entity.postId());
 
-		NewCommentResponseDTO savedComment = new NewCommentResponseDTO(comment.getId());
+		IdResponseDTO savedComment = new IdResponseDTO(comment.getId());
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> editComment(@PathVariable Long id, @RequestBody EditCommentDTO entity) {
+	public ResponseEntity<Void> editComment(@PathVariable Long id, @RequestBody EditCommentDTO entity,
+			@RequestHeader("User-Id") Long userId) {
 
-		commentService.editComment(entity.userId(), id, entity.text());
+		commentService.editComment(userId, id, entity.text());
 
 		return ResponseEntity.noContent().build();
 	}
@@ -70,11 +71,12 @@ public class CommentResource {
 	}
 
 	@PostMapping("/{id}/vote")
-	public ResponseEntity<VoteResponseDTO> addVote(@PathVariable Long id, @RequestBody VoteDTO entity) {
+	public ResponseEntity<IdResponseDTO> addVote(@PathVariable Long id, @RequestBody VoteDTO entity,
+			@RequestHeader("User-Id") Long userId) {
 
-		Vote vote = commentVoteService.vote(id, entity.voterId(), entity.wantsUpvote());
+		Vote vote = commentVoteService.vote(id, userId, entity.wantsUpvote());
 
-		VoteResponseDTO savedVote = new VoteResponseDTO(vote.getId());
+		IdResponseDTO savedVote = new IdResponseDTO(vote.getId());
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedVote);
 

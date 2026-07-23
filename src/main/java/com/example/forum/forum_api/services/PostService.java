@@ -9,6 +9,7 @@ import com.example.forum.forum_api.entities.Post;
 import com.example.forum.forum_api.entities.User;
 import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.exceptions.DomainException;
+import com.example.forum.forum_api.repositories.ForumRepository;
 import com.example.forum.forum_api.repositories.PostRepository;
 import com.example.forum.forum_api.repositories.UserRepository;
 import com.example.forum.forum_api.enums.PostStatus;
@@ -22,19 +23,25 @@ public class PostService {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Transactional
-	public Post addPost(Post post) {
+	@Autowired
+	private ForumRepository forumRepository;
 
-		if (post.getTitle() == null || post.getTitle().isBlank()) {
+	@Transactional
+	public Post addPost(Long posterId, Long forumId, String title, String content) {
+
+		User poster = userRepository.findById(posterId)
+				.orElseThrow(() -> new DomainException("User not found!"));
+
+		Forum forum = forumRepository.findById(forumId)
+				.orElseThrow(() -> new DomainException("Forum not found!"));
+
+		if (title == null || title.isBlank()) {
 			throw new DomainException("Title can't be empty");
 		}
 
-		if (post.getContent() == null || post.getContent().isBlank()) {
+		if (content == null || content.isBlank()) {
 			throw new DomainException("Content can't be empty");
 		}
-
-		User poster = post.getPoster();
-		Forum forum = post.getForum();
 
 		if (forum.getIsDeleted()) {
 			throw new DomainException("Deleted forums can't receive new posts");
@@ -44,6 +51,7 @@ public class PostService {
 			throw new DomainException("Banned users can't post");
 		}
 
+		Post post = new Post(poster, forum, title, content);
 		Post savedPost = repository.save(post);
 		return savedPost;
 	}

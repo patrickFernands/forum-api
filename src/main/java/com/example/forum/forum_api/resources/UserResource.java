@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.forum.forum_api.dtos.ChangeEmailDTO;
 import com.example.forum.forum_api.dtos.ChangeNameDTO;
 import com.example.forum.forum_api.dtos.ChangePasswordDTO;
-import com.example.forum.forum_api.dtos.UserIdDTO;
 import com.example.forum.forum_api.dtos.UserRegisterDTO;
 import com.example.forum.forum_api.dtos.UserRegisterResponseDTO;
 import com.example.forum.forum_api.entities.User;
@@ -73,16 +73,16 @@ public class UserResource {
 	}
 
 	@PutMapping("/{id}/ban")
-	public ResponseEntity<Void> ban(@PathVariable Long id, @RequestBody UserIdDTO entity) {
+	public ResponseEntity<Void> ban(@PathVariable Long id, @RequestHeader("User-Id") Long userId) {
 
-		userService.banAccount(id, entity.id());
+		userService.banAccount(id, userId);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping("/{id}/unban")
-	public ResponseEntity<Void> unban(@PathVariable Long id, @RequestBody UserIdDTO entity) {
+	public ResponseEntity<Void> unban(@PathVariable Long id, @RequestHeader("User-Id") Long userId) {
 
-		userService.unbanAccount(id, entity.id());
+		userService.unbanAccount(id, userId);
 		return ResponseEntity.noContent().build();
 	}
 
