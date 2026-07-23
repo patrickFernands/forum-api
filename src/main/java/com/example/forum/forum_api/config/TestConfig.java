@@ -124,8 +124,7 @@ public class TestConfig implements CommandLineRunner {
 		// ==========================================
 		// 5. Teste PostVoteService
 		// ==========================================
-		postVoteService.vote(post1.getId(), user2.getId(), true);
-		postVoteService.vote(post1.getId(), user2.getId(), false);
+		postVoteService.vote(post1.getId(), user1.getId(), true);
 		postVoteService.vote(post1.getId(), user2.getId(), false);
 
 		// ==========================================
