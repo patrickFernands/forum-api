@@ -12,6 +12,7 @@ import com.example.forum.forum_api.enums.PostStatus;
 import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.repositories.CommentRepository;
 import com.example.forum.forum_api.repositories.UserRepository;
+import com.example.forum.forum_api.repositories.PostRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,12 +25,21 @@ public class CommentService {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Transactional
-	public Comment addComment(Comment comment) {
+	@Autowired
+	private PostRepository postRepository;
 
-		User author = comment.getAuthor();
-		Post post = comment.getPost();
+	@Transactional
+	public Comment addComment(Long authorId, String text, Long postId) {
+
+		User author = userRepository.findById(authorId)
+				.orElseThrow(() -> new DomainException("User not found!"));
+
+		Post post = postRepository.findById(postId)
+				.orElseThrow(() -> new DomainException("Post not found!"));
+
 		Forum forum = post.getForum();
+
+		Comment comment = new Comment(author, text, post);
 
 		if (post.getIsLocked() || post.getIsDeleted()) {
 			throw new DomainException("This post can't receive new comments");
@@ -48,14 +58,20 @@ public class CommentService {
 	}
 
 	@Transactional
-	public Comment addReply(Long originalCommentId, Comment comment) {
+	public Comment addReply(Long originalCommentId, Long authorId, String text, Long postId) {
 
 		Comment originalComment = repository.findById(originalCommentId)
 				.orElseThrow(() -> new DomainException("Comment not found!"));
 
-		User author = comment.getAuthor();
-		Post post = originalComment.getPost();
+		User author = userRepository.findById(authorId)
+				.orElseThrow(() -> new DomainException("User not found!"));
+
+		Post post = postRepository.findById(postId)
+				.orElseThrow(() -> new DomainException("Post not found!"));
+
 		Forum forum = post.getForum();
+
+		Comment comment = new Comment(author, text, post);
 
 		if (post.getIsLocked() || post.getIsDeleted()) {
 			throw new DomainException("This post can't receive new comments");
