@@ -34,4 +34,13 @@ public class UserResource {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
+	/*
+	 * PUT /users/me/name ➔ Edita o próprio nome (changeName).
+	 * PUT /users/me/email ➔Edita o próprio e-mail (changeEmail). PUT
+	 * /users/me/password ➔ Edita a própria senha (changePassword).
+	 * DELETE /users/me ➔ Deleta a própria conta(deleteAccount).
+	 * PUT /users/{id}/ban ➔ Bane um usuário (Admin - banAccount).
+	 * PUT /users/{id}/unban ➔ Desbane um usuário (Admin - unbanAccount).
+	 */
+
 }
