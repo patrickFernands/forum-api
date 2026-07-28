@@ -21,26 +21,27 @@ public class ForumService {
 	private UserRepository userRepository;
 
 	@Transactional
-	public Forum createForum(Forum forum) {
+	public Forum createForum(String name, Long userId, String description) {
 
-		User creator = forum.getCreator();
+		User creator = userRepository.findById(userId).orElseThrow(() -> new DomainException("User not found!"));
 
 		if (creator.getIsBanned()) {
 			throw new DomainException("Banned users can't create forums");
 		}
 
-		if (forum.getName() == null || forum.getName().isBlank()) {
+		if (name == null || name.isBlank()) {
 			throw new DomainException("Your forum must have a name");
 		}
 
-		if (forum.getDescription() == null || forum.getDescription().isBlank()) {
+		if (description == null || description.isBlank()) {
 			throw new DomainException("Your forum must have a description");
 		}
 
-		if (repository.findByName(forum.getName()).isPresent()) {
+		if (repository.findByName(name).isPresent()) {
 			throw new DomainException("This name is already in use");
 		}
 
+		Forum forum = new Forum(name, creator, description);
 		Forum savedForum = repository.save(forum);
 		return savedForum;
 	}
