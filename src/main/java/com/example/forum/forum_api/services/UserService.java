@@ -3,8 +3,10 @@ package com.example.forum.forum_api.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.forum.forum_api.dtos.UserRegisterDTO;
 import com.example.forum.forum_api.entities.User;
 import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.exceptions.DomainException;
@@ -18,22 +20,28 @@ public class UserService {
 	@Autowired
 	private UserRepository repository;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	public List<User> findAll() {
 		return repository.findAll();
 	}
 
 	@Transactional
-	public User register(User user) {
+	public User register(UserRegisterDTO user) {
 
-		if (repository.findByEmail(user.getEmail()).isPresent()) {
+		if (repository.findByEmail(user.email()).isPresent()) {
 			throw new DomainException("This email is already in use");
 		}
 
-		if (repository.findByName(user.getName()).isPresent()) {
+		if (repository.findByName(user.name()).isPresent()) {
 			throw new DomainException("This name is already in use");
 		}
 
-		User savedUser = repository.save(user);
+		String encryptedPassword = passwordEncoder.encode(user.password());
+		User newUser = new User(user.email(), user.name(), encryptedPassword, Roles.USER);
+
+		User savedUser = repository.save(newUser);
 		return savedUser;
 	}
 
@@ -84,7 +92,7 @@ public class UserService {
 
 		User user = repository.findById(id).orElseThrow(() -> new DomainException("User not found!"));
 
-		user.setPassword(password);
+		user.setPassword(passwordEncoder.encode(password));
 		repository.save(user);
 	}
 

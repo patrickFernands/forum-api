@@ -1,9 +1,14 @@
 package com.example.forum.forum_api.entities;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.forum.forum_api.enums.Roles;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,7 +26,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_user")
-public class User {
+public class User implements UserDetails {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -160,6 +165,27 @@ public class User {
 
   public List<Forum> getAdminForums() {
     return Collections.unmodifiableList(adminForums);
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    if (this.role == Roles.ADMIN) {
+      return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+    } else if (this.role == Roles.MODERATOR) {
+      return List.of(new SimpleGrantedAuthority("ROLE_MODERATOR"), new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+  }
+
+  @Override
+  public String getUsername() {
+    return email;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return !this.isBanned;
   }
 
 }

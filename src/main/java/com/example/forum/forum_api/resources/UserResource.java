@@ -1,23 +1,20 @@
 package com.example.forum.forum_api.resources;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.forum.forum_api.dtos.ChangeEmailDTO;
 import com.example.forum.forum_api.dtos.ChangeNameDTO;
 import com.example.forum.forum_api.dtos.ChangePasswordDTO;
-import com.example.forum.forum_api.dtos.UserRegisterDTO;
-import com.example.forum.forum_api.dtos.UserRegisterResponseDTO;
 import com.example.forum.forum_api.entities.User;
+import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.services.UserService;
 
 @RestController
@@ -27,30 +24,26 @@ public class UserResource {
 	@Autowired
 	private UserService userService;
 
-	@PostMapping("/register")
-	public ResponseEntity<UserRegisterResponseDTO> register(@RequestBody UserRegisterDTO user) {
-
-		String encryptedPassword = user.password();
-
-		User newUser = new User(user.name(), user.email(), encryptedPassword, user.role());
-
-		User savedUser = userService.register(newUser);
-
-		UserRegisterResponseDTO response = new UserRegisterResponseDTO(savedUser);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
-
 	@PutMapping("/{id}/name")
-	public ResponseEntity<Void> changeName(@PathVariable Long id, @RequestBody ChangeNameDTO entity) {
+	public ResponseEntity<Void> changeName(@PathVariable Long id, @AuthenticationPrincipal User user,
+			@RequestBody ChangeNameDTO entity) {
 
-		userService.changeName(id, entity.name());
+		if (!id.equals(user.getId())) {
+			throw new DomainException("You can only edit your own account");
+		}
+
+		userService.changeName(user.getId(), entity.name());
 
 		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping("/{id}/email")
-	public ResponseEntity<Void> changeEmail(@PathVariable Long id, @RequestBody ChangeEmailDTO entity) {
+	public ResponseEntity<Void> changeEmail(@PathVariable Long id, @AuthenticationPrincipal User user,
+			@RequestBody ChangeEmailDTO entity) {
+
+		if (!id.equals(user.getId())) {
+			throw new DomainException("You can only edit your own account");
+		}
 
 		userService.changeEmail(id, entity.email());
 
@@ -58,7 +51,12 @@ public class UserResource {
 	}
 
 	@PutMapping("/{id}/password")
-	public ResponseEntity<Void> changePassword(@PathVariable Long id, @RequestBody ChangePasswordDTO entity) {
+	public ResponseEntity<Void> changePassword(@PathVariable Long id, @AuthenticationPrincipal User user,
+			@RequestBody ChangePasswordDTO entity) {
+
+		if (!id.equals(user.getId())) {
+			throw new DomainException("You can only edit your own account");
+		}
 
 		userService.changePassword(id, entity.password());
 
@@ -66,23 +64,27 @@ public class UserResource {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteAccount(@PathVariable Long id, @AuthenticationPrincipal User user) {
+
+		if (!id.equals(user.getId())) {
+			throw new DomainException("You can only delete your own account");
+		}
 
 		userService.deleteAccount(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping("/{id}/ban")
-	public ResponseEntity<Void> ban(@PathVariable Long id, @RequestHeader("User-Id") Long userId) {
+	public ResponseEntity<Void> ban(@PathVariable Long id, @AuthenticationPrincipal User user) {
 
-		userService.banAccount(userId, id);
+		userService.banAccount(user.getId(), id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PutMapping("/{id}/unban")
-	public ResponseEntity<Void> unban(@PathVariable Long id, @RequestHeader("User-Id") Long userId) {
+	public ResponseEntity<Void> unban(@PathVariable Long id, @AuthenticationPrincipal User user) {
 
-		userService.unbanAccount(userId, id);
+		userService.unbanAccount(user.getId(), id);
 		return ResponseEntity.noContent().build();
 	}
 
