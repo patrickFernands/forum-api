@@ -1,10 +1,13 @@
 package com.example.forum.forum_api.resources;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +19,7 @@ import com.example.forum.forum_api.dtos.ChangeContentDTO;
 import com.example.forum.forum_api.dtos.ChangeNameDTO;
 import com.example.forum.forum_api.dtos.ForumCreationDTO;
 import com.example.forum.forum_api.dtos.ForumCreationResponseDTO;
+import com.example.forum.forum_api.dtos.ForumSummaryDTO;
 import com.example.forum.forum_api.dtos.IdResponseDTO;
 import com.example.forum.forum_api.entities.Forum;
 import com.example.forum.forum_api.entities.User;
@@ -58,7 +62,7 @@ public class ForumResource {
 		return ResponseEntity.noContent().build();
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteMapping("delete/{id}")
 	public ResponseEntity<Void> deleteForum(@PathVariable Long id, @AuthenticationPrincipal User user) {
 
 		forumService.deleteForum(user.getId(), id);
@@ -103,6 +107,16 @@ public class ForumResource {
 		forumService.unbanUser(user.getId(), banId, id);
 
 		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping()
+	public ResponseEntity<List<ForumSummaryDTO>> listForums() {
+		return ResponseEntity.ok(forumService.getAllForums());
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<ForumSummaryDTO> getForum(@PathVariable Long id) {
+		return ResponseEntity.ok(forumService.getForumById(id));
 	}
 
 }

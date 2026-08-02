@@ -1,18 +1,23 @@
 package com.example.forum.forum_api.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.forum.forum_api.dtos.CommentSummaryDTO;
+import com.example.forum.forum_api.dtos.PostDetailDTO;
+import com.example.forum.forum_api.dtos.PostSummaryDTO;
 import com.example.forum.forum_api.entities.Forum;
 import com.example.forum.forum_api.entities.Post;
 import com.example.forum.forum_api.entities.User;
+import com.example.forum.forum_api.enums.PostStatus;
 import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.exceptions.DomainException;
 import com.example.forum.forum_api.repositories.ForumRepository;
 import com.example.forum.forum_api.repositories.PostRepository;
 import com.example.forum.forum_api.repositories.UserRepository;
-import com.example.forum.forum_api.enums.PostStatus;
 
 @Service
 public class PostService {
@@ -173,6 +178,32 @@ public class PostService {
 
 		post.setStatus(PostStatus.APPROVED);
 		repository.save(post);
+	}
+
+	public List<PostSummaryDTO> getPostsByForum(Long forumId) {
+		Forum forum = forumRepository.findById(forumId)
+				.orElseThrow(() -> new DomainException("Forum not found"));
+		return repository.findByForumAndIsDeletedFalse(forum).stream()
+				.map(p -> new PostSummaryDTO(p.getId(), p.getTitle(), p.getPoster().getName(),
+						p.getStatus().toString(), p.getIsLocked()))
+				.toList();
+	}
+
+	public PostDetailDTO getPostById(Long id) {
+		Post post = repository.findById(id)
+				.orElseThrow(() -> new DomainException("Post not found"));
+		List<CommentSummaryDTO> comments = post.getComments().stream()
+				.map(c -> new CommentSummaryDTO(c.getId(), c.getText(), c.getAuthor().getName()))
+				.toList();
+		return new PostDetailDTO(post.getId(), post.getTitle(), post.getContent(), post.getPoster().getName(),
+				post.getStatus().toString(), post.getIsLocked(), comments);
+	}
+
+	public List<PostSummaryDTO> searchPosts(String query) {
+		return repository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(query).stream()
+				.map(p -> new PostSummaryDTO(p.getId(), p.getTitle(), p.getPoster().getName(),
+						p.getStatus().toString(), p.getIsLocked()))
+				.toList();
 	}
 
 }

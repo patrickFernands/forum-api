@@ -1,9 +1,12 @@
 package com.example.forum.forum_api.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.forum.forum_api.dtos.ForumSummaryDTO;
 import com.example.forum.forum_api.entities.Forum;
 import com.example.forum.forum_api.entities.User;
 import com.example.forum.forum_api.enums.Roles;
@@ -181,6 +184,19 @@ public class ForumService {
 
 		forum.unbanUser(userToBan);
 		repository.save(forum);
+	}
+
+	public List<ForumSummaryDTO> getAllForums() {
+		return repository.findAll().stream()
+				.filter(f -> !f.getIsDeleted())
+				.map(f -> new ForumSummaryDTO(f.getId(), f.getName(), f.getDescription(), f.getCreator().getName()))
+				.toList();
+	}
+
+	public ForumSummaryDTO getForumById(Long id) {
+		Forum forum = repository.findById(id)
+				.orElseThrow(() -> new DomainException("Forum not found"));
+		return new ForumSummaryDTO(forum.getId(), forum.getName(), forum.getDescription(), forum.getCreator().getName());
 	}
 
 }
