@@ -10,4 +10,8 @@ import com.example.forum.forum_api.entities.User;
 
 public interface PostVoteRepository extends JpaRepository<PostVote, Long> {
 	Optional<PostVote> findByPostAndVoter(Post post, User voter);
+
+	long countByPostAndIsUpvoteFalse(Post post);
+
+	long countByPostAndIsUpvoteTrue(Post post);
 }

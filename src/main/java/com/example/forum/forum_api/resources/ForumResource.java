@@ -62,7 +62,7 @@ public class ForumResource {
 		return ResponseEntity.noContent().build();
 	}
 
-	@DeleteMapping("delete/{id}")
+	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteForum(@PathVariable Long id, @AuthenticationPrincipal User user) {
 
 		forumService.deleteForum(user.getId(), id);

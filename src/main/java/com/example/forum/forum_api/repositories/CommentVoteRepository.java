@@ -10,4 +10,9 @@ import com.example.forum.forum_api.entities.User;
 
 public interface CommentVoteRepository extends JpaRepository<CommentVote, Long> {
 	Optional<CommentVote> findByCommentAndVoter(Comment comment, User voter);
+
+	long countByCommentAndIsUpvoteFalse(Comment comment);
+
+	long countByCommentAndIsUpvoteTrue(Comment comment);
+
 }

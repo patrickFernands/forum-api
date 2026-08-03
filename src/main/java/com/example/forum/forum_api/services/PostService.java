@@ -9,14 +9,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.forum.forum_api.dtos.CommentSummaryDTO;
 import com.example.forum.forum_api.dtos.PostDetailDTO;
 import com.example.forum.forum_api.dtos.PostSummaryDTO;
+import com.example.forum.forum_api.entities.Comment;
 import com.example.forum.forum_api.entities.Forum;
 import com.example.forum.forum_api.entities.Post;
 import com.example.forum.forum_api.entities.User;
 import com.example.forum.forum_api.enums.PostStatus;
 import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.exceptions.DomainException;
+import com.example.forum.forum_api.repositories.CommentRepository;
+import com.example.forum.forum_api.repositories.CommentVoteRepository;
 import com.example.forum.forum_api.repositories.ForumRepository;
 import com.example.forum.forum_api.repositories.PostRepository;
+import com.example.forum.forum_api.repositories.PostVoteRepository;
 import com.example.forum.forum_api.repositories.UserRepository;
 
 @Service
@@ -30,6 +34,15 @@ public class PostService {
 
 	@Autowired
 	private ForumRepository forumRepository;
+
+	@Autowired
+	private PostVoteRepository postVoteRepository;
+
+	@Autowired
+	private CommentVoteRepository commentVoteRepository;
+
+	@Autowired
+	private CommentRepository commentRepository;
 
 	@Transactional
 	public Post addPost(Long posterId, Long forumId, String title, String content) {
@@ -181,8 +194,10 @@ public class PostService {
 	}
 
 	public List<PostSummaryDTO> getPostsByForum(Long forumId) {
+
 		Forum forum = forumRepository.findById(forumId)
 				.orElseThrow(() -> new DomainException("Forum not found"));
+
 		return repository.findByForumAndIsDeletedFalse(forum).stream()
 				.map(p -> new PostSummaryDTO(p.getId(), p.getTitle(), p.getPoster().getName(),
 						p.getStatus().toString(), p.getIsLocked()))
@@ -192,11 +207,14 @@ public class PostService {
 	public PostDetailDTO getPostById(Long id) {
 		Post post = repository.findById(id)
 				.orElseThrow(() -> new DomainException("Post not found"));
-		List<CommentSummaryDTO> comments = post.getComments().stream()
-				.map(c -> new CommentSummaryDTO(c.getId(), c.getText(), c.getAuthor().getName()))
-				.toList();
+
+		long upvotes = postVoteRepository.countByPostAndIsUpvoteTrue(post);
+		long downvotes = postVoteRepository.countByPostAndIsUpvoteFalse(post);
+
+		List<CommentSummaryDTO> comments = post.getComments().stream().map(this::toDTO).toList();
+
 		return new PostDetailDTO(post.getId(), post.getTitle(), post.getContent(), post.getPoster().getName(),
-				post.getStatus().toString(), post.getIsLocked(), comments);
+				post.getStatus().toString(), post.getIsLocked(), comments, upvotes, downvotes);
 	}
 
 	public List<PostSummaryDTO> searchPosts(String query) {
@@ -204,6 +222,14 @@ public class PostService {
 				.map(p -> new PostSummaryDTO(p.getId(), p.getTitle(), p.getPoster().getName(),
 						p.getStatus().toString(), p.getIsLocked()))
 				.toList();
+	}
+
+	// método pra auxiliar na obtenção dos comentários aninhados.
+	private CommentSummaryDTO toDTO(Comment c) {
+
+		return new CommentSummaryDTO(c.getId(), c.getText(), c.getAuthor().getName(),
+				commentVoteRepository.countByCommentAndIsUpvoteTrue(c), commentVoteRepository.countByCommentAndIsUpvoteFalse(c),
+				c.getNestedComments().stream().map(a -> toDTO(a)).toList());
 	}
 
 }

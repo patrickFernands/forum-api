@@ -11,4 +11,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 	List<Post> findByForumAndIsDeletedFalse(Forum forum);
 
 	List<Post> findByTitleContainingIgnoreCaseAndIsDeletedFalse(String title);
+
 }

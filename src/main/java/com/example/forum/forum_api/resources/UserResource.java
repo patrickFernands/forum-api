@@ -63,7 +63,7 @@ public class UserResource {
 		return ResponseEntity.noContent().build();
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteMapping("delete/{id}")
 	public ResponseEntity<Void> deleteAccount(@PathVariable Long id, @AuthenticationPrincipal User user) {
 
 		if (!id.equals(user.getId())) {

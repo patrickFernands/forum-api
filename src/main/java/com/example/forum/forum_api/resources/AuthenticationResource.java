@@ -4,7 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,12 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.forum.forum_api.dtos.AuthenticationDTO;
 import com.example.forum.forum_api.dtos.LoginResponseDTO;
 import com.example.forum.forum_api.dtos.UserRegisterDTO;
+import com.example.forum.forum_api.dtos.UserSummaryDTO;
 import com.example.forum.forum_api.entities.User;
-import com.example.forum.forum_api.enums.Roles;
 import com.example.forum.forum_api.infra.security.TokenService;
 import com.example.forum.forum_api.services.UserService;
 
-import ch.qos.logback.core.subst.Token;
 import jakarta.validation.Valid;
 
 @RestController
@@ -49,6 +49,15 @@ public class AuthenticationResource {
 
 		this.userService.register(data);
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<UserSummaryDTO> getMethodName(@AuthenticationPrincipal User user) {
+
+		UserSummaryDTO authUser = new UserSummaryDTO(user.getId(), user.getEmail(), user.getName(),
+				user.getRole().toString());
+
+		return ResponseEntity.ok(authUser);
 	}
 
 }
