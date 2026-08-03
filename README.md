@@ -61,6 +61,6 @@ cd forum-api
 
 ## Melhorias futuras
 
-- Autenticação e autorização via Spring Security + JWT
-- Testes automatizados dos fluxos de moderação e votação
+- Testes automatizados
 - Paginação nos endpoints de listagem
+- FrontEnd em Angular
