@@ -47,10 +47,6 @@ exceptions/    → exceções de domínio e handler global
 | POST | `/comments/{id}/replies` | Responde a um comentário |
 | POST | `/comments/{id}/vote` | Vota em um comentário |
 
-## Autenticação — em desenvolvimento
-
-Atualmente, a identificação do usuário autenticado é feita via header `User-Id`, enviado diretamente na requisição. A implementação de **autenticação real com Spring Security e JWT** (nos mesmos moldes do [simple-wallet](https://github.com/patrickFernands/simple-wallet)) está em andamento, substituindo o header por um token validado no backend.
-
 ## Como rodar
 
 ```bash
